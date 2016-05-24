@@ -27,6 +27,7 @@
 
 #include "../cloud_config.h"
 #include "session_msg.h"
+#include "user_info.h"
 #include "hub_message_expand.h"
 
 int hub_message_expand_init(void * sub_proc,void * para)
@@ -47,6 +48,9 @@ int hub_message_expand_start(void * sub_proc,void * para)
 	time_t tm;
 
 	struct session_msg * first_msg;
+	struct user_info_list * user_info;
+	struct login_info * login;
+	
 
 	usleep(500*1000);
 	ret=GetFirstPolicy(&first_msg,"MSGD");
@@ -73,6 +77,21 @@ int hub_message_expand_start(void * sub_proc,void * para)
 	ret=sec_subject_sendmsg(sub_proc,send_msg);
 	if(ret>=0)
 		printf("send first message succeed!\n");
+
+	ret=GetFirstPolicy(&user_info,"UL_I");
+	if(ret<0)
+		return ret;
+	login=malloc(sizeof(struct login_info));
+	memcpy(login->user,user_info->name,DIGEST_SIZE);
+	memcpy(login->passwd,user_info->passwd,DIGEST_SIZE);
+	send_msg=message_create("LOGI",NULL);
+	if(send_msg==NULL)
+		return -EINVAL;
+	message_add_record(send_msg,login);
+	ret=sec_subject_sendmsg(sub_proc,send_msg);
+	if(ret>=0)
+		printf("send second message succeed!\n");
+
 	
 
 	for(i=0;i<3000*1000;i++)
@@ -94,7 +113,8 @@ int hub_message_expand_start(void * sub_proc,void * para)
 			printf("message format is not registered!\n");
 			continue;
 		}
-		proc_echo_message(sub_proc,recv_msg);
+		if(strncmp(type,"MSGD",4)==0)
+			proc_echo_message(sub_proc,recv_msg);
 	}
 
 	return 0;
@@ -107,24 +127,26 @@ int proc_echo_message(void * sub_proc,void * message)
 	int ret;
 	printf("begin proc echo \n");
 	struct message_box * msg_box=message;
-	type=message_get_recordtype(message);
 
 	struct message_box * new_msg;
-	void * record;
-	new_msg=message_create(type,message);
-	
-	i=0;
+	struct session_msg * echo_msg;
+	time_t tm;
 
-	ret=message_get_record(message,&record,i++);
+
+	ret=message_get_record(message,&echo_msg,0);
+	if(echo_msg==NULL)
+		return 0;
+
+	time(&tm);
+	echo_msg->time=tm;
+
+	ret=entity_hash_uuid("MSGD",echo_msg);
 	if(ret<0)
 		return ret;
-	while(record!=NULL)
-	{
-		message_add_record(new_msg,record);
-		ret=message_get_record(message,&record,i++);
-		if(ret<0)
-			return ret;
-	}
+	
+	new_msg=message_create("MSGD",message);
+	
+	message_add_record(new_msg,echo_msg);
 	sec_subject_sendmsg(sub_proc,new_msg);
 	return ret;
 }
