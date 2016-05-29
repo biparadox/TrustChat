@@ -1,6 +1,6 @@
 {
-	"sender":"hujun",
-	"receiver":"",
+	"sender":"zhaowen",
+	"receiver":"zhangle",
 	"msg":"Hello,world!",
-	"flag":"GENERAL"
+	"flag":"PRIVATE"
 }

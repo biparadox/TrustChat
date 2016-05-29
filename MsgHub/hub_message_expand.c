@@ -74,6 +74,17 @@ int hub_message_expand_start(void * sub_proc,void * para)
 	if(send_msg==NULL)
 		return -EINVAL;
 	message_add_record(send_msg,first_msg);
+        if(first_msg->flag==MSG_PRIVATE){
+        	struct expand_extra_info  *eei;
+        	eei =malloc(sizeof(struct expand_extra_info));
+        	if(eei==NULL)
+                	return -ENOMEM;
+                memset(eei->uuid,0,DIGEST_SIZE*2);
+                memcpy(eei->uuid,first_msg->receiver,DIGEST_SIZE);
+                eei->data_size=sizeof(struct expand_extra_info );
+                memcpy(eei->tag,"EEIE",4);
+                message_add_expand(send_msg,eei);
+	}
 	ret=sec_subject_sendmsg(sub_proc,send_msg);
 	if(ret>=0)
 		printf("send first message succeed!\n");
@@ -115,6 +126,8 @@ int hub_message_expand_start(void * sub_proc,void * para)
 		}
 		if(strncmp(type,"MSGD",4)==0)
 			proc_echo_message(sub_proc,recv_msg);
+		//if(strncmp(type,"LOGI",4)==0)
+		//	proc_echo_message(sub_proc,recv_msg);
 	}
 
 	return 0;
@@ -131,12 +144,11 @@ int proc_echo_message(void * sub_proc,void * message)
 	struct message_box * new_msg;
 	struct session_msg * echo_msg;
 	time_t tm;
-
-
+         
 	ret=message_get_record(message,&echo_msg,0);
 	if(echo_msg==NULL)
 		return 0;
-
+	
 	time(&tm);
 	echo_msg->time=tm;
 
@@ -146,6 +158,17 @@ int proc_echo_message(void * sub_proc,void * message)
 	
 	new_msg=message_create("MSGD",message);
 	
+        if(echo_msg->flag==MSG_PRIVATE){
+        	struct expand_extra_info  *eei;
+        	eei =malloc(sizeof(struct expand_extra_info));
+        	if(eei==NULL)
+                	return -ENOMEM;
+                memset(eei->uuid,0,DIGEST_SIZE*2);
+                memcpy(eei->uuid,echo_msg->receiver,DIGEST_SIZE);
+                eei->data_size=sizeof(struct expand_extra_info );
+                memcpy(eei->tag,"EEIE",4);
+                message_add_expand(new_msg,eei);
+	}
 	message_add_record(new_msg,echo_msg);
 	sec_subject_sendmsg(sub_proc,new_msg);
 	return ret;
