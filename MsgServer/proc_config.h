@@ -19,7 +19,6 @@ static PROCDB_INIT procdb_init_list[]=
 static PROC_INIT proc_init_list[]=
 {
 	{"hub_message_expand",PROC_TYPE_MONITOR,&hub_message_expand_init,&hub_message_expand_start},
-	{"json_port",PROC_TYPE_MONITOR,&json_port_init,&json_port_start},
 	{"ms_ser_db",PROC_TYPE_MONITOR,&ms_ser_db_init,&ms_ser_db_start},
 	{NULL,0,NULL,NULL}
 };

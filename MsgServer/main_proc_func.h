@@ -7,7 +7,6 @@
 #include "../include/message_struct.h"
 #include "../include/message_struct_desc.h"
 #include "hub_message_expand.h"
-#include "json_port_func.h"
 #include "ms_ser_db.h"
 int MsgServer_init();
 
