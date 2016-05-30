@@ -198,6 +198,10 @@ int aik_verify(char * user)
 	key_list=malloc(sizeof(struct node_key_list));
 	if(key_list==NULL)
 		return -ENOMEM;
+	if(user!=NULL)
+	{
+		strncpy(user,server_info.user_info.user_name,DIGEST_SIZE);
+	}
 
 	return 0;
 }
@@ -315,15 +319,15 @@ int local_key_generate(void * sub_proc)
 		
 		if(local_keylist->nodeAIK[0]==0)
 			key_state=AIK_REQUEST;
-		else if(local_keylist->nodeAIKSda[0]==0)
+		else if(pub_keylist->nodeAIKSda[0]==0)
 			key_state=AIK_GENERATE;
 		else if(local_keylist->nodeBindKey[0]==0)
 			key_state=AIK_VERIFY;
-		else if(local_keylist->nodeBindKeyVal[0]==0)
+		else if(pub_keylist->nodeBindKeyVal[0]==0)
 			key_state=BINDKEY_GENERATE;
 		else if(local_keylist->nodeSignKey[0]==0)
 			key_state=BINDKEY_VERIFY;
-		else if(local_keylist->nodeSignKeyVal[0]==0)
+		else if(pub_keylist->nodeSignKeyVal[0]==0)
 			key_state=SIGNKEY_GENERATE;
 		else
 		{
@@ -408,7 +412,7 @@ int local_key_generate(void * sub_proc)
 				else
 				{
 					close(fd);
-					ret=aik_verify(NULL);
+					ret=aik_verify(local_keylist->username);
 					if(ret<0)
 					{
 						remove("cert/AIK.sda");
@@ -417,6 +421,7 @@ int local_key_generate(void * sub_proc)
 						key_state=NO_AIKEY;
 						break;
 					}
+					memcpy(pub_keylist->username,local_keylist->username,DIGEST_SIZE);
 					ret=trustfile_to_uuidname("privkey/AIK.key",local_keylist->nodeAIK);
 					if(ret<0)
 						return ret;
@@ -507,8 +512,8 @@ int local_key_generate(void * sub_proc)
 				}
 
 				break;
-/*			
-			case BINDKEY_VERIFIED:
+			
+			case BINDKEY_VERIFY:
 //				ret=bind_pubkey_memdb_init();
 //				if(ret<0)
 //				{
@@ -516,12 +521,13 @@ int local_key_generate(void * sub_proc)
 //				}
 				
 				return 0;
-*/
+
 			default:
 				return -EINVAL;	
 		
 		}
 	}
+	return 0;
 
 }
 

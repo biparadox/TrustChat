@@ -30,6 +30,8 @@
 
 #include "../cloud_config.h"
 #include "main_proc_func.h"
+#include "session_msg.h"
+#include "user_info.h"
 
 struct bind_proc_pointer
 {
@@ -138,13 +140,52 @@ int proc_bind_message(void * sub_proc,void * message)
 	void* bind_blob;
 	int bind_blob_size;
 
+	struct user_name_expand * user_info;
+	char bindkey_file[DIGEST_SIZE*3];
+
+	ret=message_get_define_expand(message,&user_info,"USNE");
+	if(ret<0)
+		return ret;
+	if(user_info==NULL)
+	{
+		printf("message has no receiver's info!\n");
+		return -EINVAL;
+	}
+	
+	ret=GetFirstPolicy(&pub_keylist,"NKLD");
+
+	if(ret<0)
+		return ret;
+	while(pub_keylist!=NULL)
+	{
+		if(strncmp(user_info->name,pub_keylist->username,DIGEST_SIZE)==0)
+			break;
+		ret=GetNextPolicy(&pub_keylist,"NKLD");
+		if(ret<0)
+			return ret;
+	}
+
+	if(pub_keylist==NULL)
+	{
+		printf("can't find user %s's public key struct!\n",user_info->name);
+	}
+
+	
+	TSS_HKEY hBindPubKey;
+	sprintf(bindkey_file,"pubkey/%.64s",pub_keylist->nodeBindKey);
+
+	result=TESI_Local_ReadPubKey(&hBindPubKey,bindkey_file);
+	if(result!=TSS_SUCCESS)
+	{
+		printf("load bindpubkey %s error %d!\n",bindkey_file,result);
+		return -EINVAL;
+	}
+	
+
 	blob_size=message_get_blob(message,&blob);
 	if(blob_size<=0)
 		return -EINVAL;
-
-	local_keylist
-
-	result=TESI_Local_BindBuffer(blob,blob_size,bind_pointer->hBindPubKey,&bind_blob,&bind_blob_size);
+	result=TESI_Local_BindBuffer(blob,blob_size,hBindPubKey,&bind_blob,&bind_blob_size);
 	if ( result != TSS_SUCCESS )
 	{
 		return -EINVAL;
@@ -161,18 +202,9 @@ int proc_bind_message(void * sub_proc,void * message)
 int proc_unbind_message(void * sub_proc,void * message)
 {
 	TSS_RESULT result;
-	struct bind_proc_pointer * bind_pointer;
-	int i;
+
 	int ret;
-
-	void * context;
-	ret=sec_subject_getcontext(sub_proc,&context);
-	if(ret<0)
-		return ret;
-	bind_pointer=sec_object_getpointer(context);
-	if(bind_pointer==NULL)
-		return -EINVAL;
-
+	struct node_key_list * local_keylist;
 		
 	void * blob;
 	int blob_size;
@@ -180,11 +212,55 @@ int proc_unbind_message(void * sub_proc,void * message)
 	void* bind_blob;
 	int bind_blob_size;
 
+	struct user_name_expand * user_info;
+	char bindkey_file[DIGEST_SIZE*3];
+
+	ret=message_get_define_expand(message,&user_info,"USNE");
+	if(ret<0)
+		return ret;
+	if(user_info==NULL)
+	{
+		printf("message has no receiver's info!\n");
+		return -EINVAL;
+	}
+	
+	ret=GetFirstPolicy(&local_keylist,"LKLD");
+
+	if(ret<0)
+		return ret;
+	while(local_keylist!=NULL)
+	{
+		if(strncmp(user_info->name,local_keylist->username,DIGEST_SIZE)==0)
+			break;
+		ret=GetNextPolicy(&local_keylist,"LKLD");
+		if(ret<0)
+			return ret;
+	}
+
+	if(local_keylist==NULL)
+	{
+		printf("can't find user %s's public key struct!\n",user_info->name);
+	}
+
+	
+	TSS_HKEY hBindKey;
+	sprintf(bindkey_file,"privkey/%.64s",local_keylist->nodeBindKey);
+	result=TESI_Local_ReadKeyBlob(&hBindKey,bindkey_file);
+	if(result!=TSS_SUCCESS)
+	{
+		printf("load bindkey error %d!\n",result);
+	}
+	result=TESI_Local_LoadKey(hBindKey,NULL,"kkk");
+	if(result!=TSS_SUCCESS)
+	{
+		printf("load bindkey error %d!\n",result);
+		return -ENFILE;
+	}
 	blob_size=message_get_blob(message,&blob);
 	if(blob_size<=0)
 		return -EINVAL;
 
-	result=TESI_Local_UnBindBuffer(blob,blob_size,bind_pointer->hBindKey,&bind_blob,&bind_blob_size);
+	result=TESI_Local_UnBindBuffer(blob,blob_size,hBindKey,&bind_blob,&bind_blob_size);
 	if ( result != TSS_SUCCESS )
 	{
 		return -EINVAL;

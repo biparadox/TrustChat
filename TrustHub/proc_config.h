@@ -15,6 +15,7 @@ static PROCDB_INIT procdb_init_list[]=
 	{"LKLD",&null_init_func,&node_key_list_desc,&general_lib_ops},
 	{"CERI",&null_init_func,&aik_cert_info_desc,&general_lib_ops},
 	{"KREC",&null_init_func,&key_request_cmd_desc,&general_lib_ops},
+	{"USNE",NULL,&user_name_expand_desc,NULL},
 	{NULL,NULL,NULL,NULL}
 };
 

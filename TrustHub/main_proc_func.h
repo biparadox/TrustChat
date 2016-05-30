@@ -11,6 +11,8 @@
 #include "session_msg.h"
 #include "key_manage_func.h"
 #include "file_receiver_func.h"
+#include "hub_bind_func.h"
+#include "user_info.h"
 
 
 int TrustHub_init();
