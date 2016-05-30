@@ -34,12 +34,15 @@
 #include "../cloud_config.h"
 #include "main_proc_func.h"
 
-int bind_key_generate()
+int bind_key_generate(char * aik_uuid)
 {
 	TSS_HKEY	hKey;
 	TSS_HKEY	hAIKey;
 	TSS_RESULT	result;
 
+	char aik_file[DIGEST_SIZE*3];
+
+	sprintf(aik_file,"privkey/%.64s",aik_uuid);
 	result=TESI_Local_CreateBindKey(&hKey,NULL,"sss","kkk");
 	if ( result != TSS_SUCCESS )
 	{
@@ -59,7 +62,7 @@ int bind_key_generate()
 		printf( "Write bind pubkey error!\n");
 		return result;
 	}
-	result=TESI_Local_ReadKeyBlob(&hAIKey,"privkey/AIK");
+	result=TESI_Local_ReadKeyBlob(&hAIKey,aik_file);
 	if ( result != TSS_SUCCESS )
 	{
 		printf( "Read AIK failed!\n");
@@ -87,7 +90,7 @@ int bind_key_generate()
 	
 	return result;
 }
-int bindkey_verify()
+int bindkey_verify(char * aik_uuid,char * bindval_uuid,char * bindkey_uuid)
 {
 	TSS_VALIDATION valdata;
 	TSS_RESULT result;
@@ -96,23 +99,32 @@ int bindkey_verify()
 	KEY_CERT * cert;
 	BYTE digest[DIGEST_SIZE];
 
-	result=TESI_Local_ReadPubKey(&hAIKey,"pubkey/AIK");
+	char aik_file[DIGEST_SIZE*3];
+	char bindkey_val[DIGEST_SIZE*3];
+	char bindkey_file[DIGEST_SIZE*3];
+
+
+	sprintf(bindkey_val,"cert/%.64s",bindval_uuid);
+	sprintf(aik_file,"pubkey/%.64s",aik_uuid);
+	sprintf(bindkey_file,"pubkey/%.64s",bindkey_uuid);
+
+	result=TESI_Local_ReadPubKey(&hAIKey,aik_file);
 	if(result!=TSS_SUCCESS)
 	{
 		printf("Read AIK failed!\n");
 		return result;
 	}
 
-	result=TESI_Local_VerifyValData(hAIKey,"cert/bindkey");
+	result=TESI_Local_VerifyValData(hAIKey,bindkey_val);
 	if(result!=TSS_SUCCESS)
 	{
 		printf("verify bindkey failed!\n");
 		return result;
 	}
-	cert=create_key_certify_struct("cert/bindkey",NULL,NULL);
+	cert=create_key_certify_struct(bindkey_val,NULL,NULL);
 	if(cert==NULL)	
 		return -EINVAL;
-	result=TESI_Local_ReadPubKey(&hBindPubKey,"pubkey/bindpubkey");
+	result=TESI_Local_ReadPubKey(&hBindPubKey,bindkey_file);
 	if(result!=TSS_SUCCESS)
 	{
 		printf("Read bindkey failed!\n");
@@ -142,6 +154,11 @@ int aik_verify(char * user)
 	struct  aik_cert_info server_info;
 	struct node_key_list * key_list;
 	BYTE digest[DIGEST_SIZE];
+
+	BYTE filename[DIGEST_SIZE*2+DIGEST_SIZE];
+
+	
+
 	ret=ReadSignDataFromFile(&signdata,"cert/AIK");
 	if(ret<0)
 		return -EIO;
@@ -434,7 +451,7 @@ int local_key_generate(void * sub_proc)
 				else
 				{
 					close(fd);
-					ret=bind_key_generate();
+					ret=bind_key_generate(local_keylist->nodeAIK);
 					if(ret<0)
 						return ret;
 				}
@@ -454,14 +471,32 @@ int local_key_generate(void * sub_proc)
 				else
 				{
 					close(fd);
-//					ret=bindkey_verify();
-//					if(ret!=0)
-//					{
-//						remove("cert/bindkey.val");
-//						remove("pubkey/bindpubkey.pem");
-//						key_state=AIK_READY;
-//						break;
-//					}	
+					ret=trustfile_to_uuidname("cert/bindkey.val",pub_keylist->nodeBindKeyVal);
+					if(ret<0)
+						return ret;
+					ret=trustfile_to_uuidname("privkey/bindkey.key",local_keylist->nodeBindKey);
+					if(ret<0)
+						return ret;
+					ret=trustfile_to_uuidname("pubkey/bindkey.pem",pub_keylist->nodeBindKey);
+					if(ret<0)
+						return ret;
+
+					if(bindkey_verify(pub_keylist->nodeAIK,pub_keylist->nodeBindKeyVal,pub_keylist->nodeBindKey)!=0)
+					{
+						printf("bindkey verify failed!\n");
+						return -EINVAL;
+					}
+					else
+					{
+
+						ret=DelPolicy(local_keylist,"LKLD");	
+						ret=AddPolicy(local_keylist,"LKLD");
+						ret=ExportPolicy("LKLD");
+
+						ret=DelPolicy(pub_keylist,"NKLD");	
+						ret=AddPolicy(pub_keylist,"NKLD");
+						ret=ExportPolicy("NKLD");
+					}
 					
 					key_state=BINDKEY_VERIFY;
 				}
@@ -535,7 +570,7 @@ int key_manage_start(void * sub_proc,void * para)
 		return ret;
 
 
-
+/*
 	for(i=0;i<3000*1000;i++)
 	{
 
@@ -677,7 +712,7 @@ int key_manage_start(void * sub_proc,void * para)
 				return -EINVAL;	
 		
 		}
-			
 	}
+*/
 	return 0;
 }

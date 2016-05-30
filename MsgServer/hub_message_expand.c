@@ -107,15 +107,29 @@ int proc_echo_message(void * sub_proc,void * message)
 	new_msg=message_create("MSGD",message);
 	
         if(echo_msg->flag==MSG_PRIVATE){
+                struct expand_extra_info  *eei_data;
                 struct expand_extra_info  *eei;
-                eei =malloc(sizeof(struct expand_extra_info));
+                eei=malloc(sizeof(struct expand_extra_info));
+   		struct user_addr_list *first_msg;
+                ret=message_remove_expand(message,"EEIE",&eei_data);
+                if(ret<0)
+ 		   return ret;
+                ret=FindPolicy(eei_data->uuid,"U2AL",&first_msg);
+		if(ret<0)
+                        return -EINVAL;
+                if(first_msg==NULL)
+                {
+                	printf("find addr failed!\n");
+                        return -EINVAL;
+		}
                 if(eei==NULL)
                         return -ENOMEM;
                 memset(eei->uuid,0,DIGEST_SIZE*2);
-                memcpy(eei->uuid,echo_msg->receiver,DIGEST_SIZE);
+                memcpy(eei->uuid,first_msg->addr,DIGEST_SIZE*2);
                 eei->data_size=sizeof(struct expand_extra_info );
                 memcpy(eei->tag,"EEIE",4);
                 message_add_expand(new_msg,eei);
+               
         }
 	else if(echo_msg->flag==MSG_GENERAL){
                 struct expand_extra_info  *eei;
