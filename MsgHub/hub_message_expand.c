@@ -92,14 +92,14 @@ int hub_message_expand_start(void * sub_proc,void * para)
 		return -EINVAL;
 	message_add_record(send_msg,first_msg);
         if(first_msg->flag==MSG_PRIVATE){
-        	struct expand_extra_info  *eei;
-        	eei =malloc(sizeof(struct expand_extra_info));
+        	struct user_name_expand  *eei;
+        	eei =malloc(sizeof(struct user_name_expand));
         	if(eei==NULL)
                 	return -ENOMEM;
-                memset(eei->uuid,0,DIGEST_SIZE*2);
-                memcpy(eei->uuid,first_msg->receiver,DIGEST_SIZE);
-                eei->data_size=sizeof(struct expand_extra_info );
-                memcpy(eei->tag,"EEIE",4);
+                memset(eei->name,0,DIGEST_SIZE);
+                memcpy(eei->name,first_msg->receiver,DIGEST_SIZE);
+                eei->data_size=sizeof(struct user_name_expand );
+                memcpy(eei->tag,"USNE",4);
                 message_add_expand(send_msg,eei);
 	}
 
@@ -162,14 +162,14 @@ int proc_echo_message(void * sub_proc,void * message)
 	new_msg=message_create("MSGD",message);
 	
         if(echo_msg->flag==MSG_PRIVATE){
-        	struct expand_extra_info  *eei;
-        	eei =malloc(sizeof(struct expand_extra_info));
+        	struct user_name_expand  *eei;
+        	eei =malloc(sizeof(struct user_name_expand));
         	if(eei==NULL)
                 	return -ENOMEM;
-                memset(eei->uuid,0,DIGEST_SIZE*2);
-                memcpy(eei->uuid,echo_msg->receiver,DIGEST_SIZE);
+                memset(eei->name,0,DIGEST_SIZE);
+                memcpy(eei->name,echo_msg->receiver,DIGEST_SIZE);
                 eei->data_size=sizeof(struct expand_extra_info );
-                memcpy(eei->tag,"EEIE",4);
+                memcpy(eei->tag,"USNE",4);
                 message_add_expand(new_msg,eei);
 	}
 	message_add_record(new_msg,echo_msg);

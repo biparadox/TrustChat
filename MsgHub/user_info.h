@@ -48,4 +48,19 @@ static struct struct_elem_attr login_info_desc[]=
 	{"nonce",OS210_TYPE_BINDATA,DIGEST_SIZE,NULL},
 	{NULL,OS210_TYPE_ENDDATA,0,NULL}
 };
+struct user_name_expand
+{
+	int data_size;
+	char tag[4];
+	char name[DIGEST_SIZE];
+};
+
+static struct struct_elem_attr user_name_expand_desc[]=
+{
+	{"data_size",OS210_TYPE_INT,sizeof(int),0},
+	{"tag",OS210_TYPE_STRING,4,0},
+	{"name",OS210_TYPE_STRING,DIGEST_SIZE,NULL},
+	{NULL,OS210_TYPE_ENDDATA,0,NULL}
+};
+
 #endif

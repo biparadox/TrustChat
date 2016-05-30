@@ -28,6 +28,7 @@
 #include "../cloud_config.h"
 #include "session_msg.h"
 #include "hub_message_expand.h"
+#include "user_info.h"
 
 int hub_message_expand_init(void * sub_proc,void * para)
 {
@@ -97,22 +98,22 @@ int proc_echo_message(void * sub_proc,void * message)
 	if(echo_msg==NULL)
 		return 0;
 	
-	new_msg=message_create("MSGD",NULL);
+//	new_msg=message_create("MSGD",NULL);
 	
         if(echo_msg->flag==MSG_PRIVATE){
-                struct expand_extra_info  *eei_data;
+                struct user_name_expand  *user_name;
                 struct expand_extra_info  *eei;
                 eei=malloc(sizeof(struct expand_extra_info));
    		struct user_addr_list *first_msg;
-                ret=message_remove_expand(message,"EEIE",&eei_data);
+                ret=message_get_define_expand(message,&user_name,"USNE");
                 if(ret<0)
  		   return ret;
-		if(eei_data==NULL)
+		if(user_name==NULL)
 		{
 			printf("private message no receiver!\n");
 			return -EINVAL;
 		}
-                ret=FindPolicy(eei_data->uuid,"U2AL",&first_msg);
+                ret=FindPolicy(user_name->name,"U2AL",&first_msg);
 		if(ret<0)
                         return -EINVAL;
                 if(first_msg==NULL)
@@ -126,7 +127,7 @@ int proc_echo_message(void * sub_proc,void * message)
                 memcpy(eei->uuid,first_msg->addr,DIGEST_SIZE*2);
                 eei->data_size=sizeof(struct expand_extra_info );
                 memcpy(eei->tag,"EEIE",4);
-                message_add_expand(new_msg,eei);
+                message_add_expand(message,eei);
                
         }
 	else if(echo_msg->flag==MSG_GENERAL){
@@ -153,15 +154,15 @@ int proc_echo_message(void * sub_proc,void * message)
                 memcpy(eei->uuid,first_msg->addr,DIGEST_SIZE*2);
                 eei->data_size=sizeof(struct expand_extra_info );
                 memcpy(eei->tag,"EEIE",4);
-                message_add_expand(new_msg,eei);
+                message_add_expand(message,eei);
         }
 
-	message_add_record(new_msg,echo_msg);
+//	message_add_record(new_msg,echo_msg);
 	//timestr=ctime_r(&tm,time_stamp->time);
 	//if (timestr<=0)
 	//	return -EINVAL;
 
 	//message_add_expand(new_msg,time_stamp);
-	sec_subject_sendmsg(sub_proc,new_msg);
+	sec_subject_sendmsg(sub_proc,message);
 	return ret;
 }
