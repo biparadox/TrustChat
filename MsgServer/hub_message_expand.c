@@ -76,12 +76,21 @@ int proc_echo_message(void * sub_proc,void * message)
 	const char * type;
 	int i;
 	int ret;
+	
+	//struct expand_time_stamp * time_stamp;
+	//char * timestr;
+	//time_stamp = malloc(sizeof(struct expand_time_stamp));
 	printf("begin proc echo \n");
 	struct message_box * msg_box=message;
 
 	struct message_box * new_msg;
 	struct session_msg * echo_msg;
 	time_t tm;
+
+	//if (time_stamp==NULL)
+	//	return -ENOMEM;
+	//memcpy(time_stamp->tag,"TIME",4);
+	//time_stamp->data_size=sizeof(struct expand_time_stamp);
 
 
 	ret=message_get_record(message,&echo_msg,0);
@@ -106,9 +115,41 @@ int proc_echo_message(void * sub_proc,void * message)
                 memcpy(eei->uuid,echo_msg->receiver,DIGEST_SIZE);
                 eei->data_size=sizeof(struct expand_extra_info );
                 memcpy(eei->tag,"EEIE",4);
-                message_add_expand(message,eei);
+                message_add_expand(new_msg,eei);
         }
+	else if(echo_msg->flag==MSG_GENERAL){
+                struct expand_extra_info  *eei;
+		void * search_from_db;
+		struct user_addr_list * first_msg;
+		ret=GetFirstPolicy(&first_msg,"U2AL");
+	        if(ret<0)
+        	        return -EINVAL;
+       		 //search_from_db=message_create("U2AL",NULL);
+       		// if(search_from_db==NULL)
+                //	return -EINVAL;
+       		 //message_add_record(send_msg,first_msg);
+		if(first_msg==NULL)
+		{
+			printf("find addr failed!\n");
+			return -EINVAL;
+		}
+
+                eei =malloc(sizeof(struct expand_extra_info));
+                if(eei==NULL)
+                        return -ENOMEM;
+                memset(eei->uuid,0,DIGEST_SIZE*2);
+                memcpy(eei->uuid,first_msg->addr,DIGEST_SIZE*2);
+                eei->data_size=sizeof(struct expand_extra_info );
+                memcpy(eei->tag,"EEIE",4);
+                message_add_expand(new_msg,eei);
+        }
+
 	message_add_record(new_msg,echo_msg);
+	//timestr=ctime_r(&tm,time_stamp->time);
+	//if (timestr<=0)
+	//	return -EINVAL;
+
+	//message_add_expand(new_msg,time_stamp);
 	sec_subject_sendmsg(sub_proc,new_msg);
 	return ret;
 }

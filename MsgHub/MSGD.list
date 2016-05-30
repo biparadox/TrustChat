@@ -2,5 +2,5 @@
 	"sender":"zhaowen",
 	"receiver":"zhangle",
 	"msg":"Hello,world!",
-	"flag":"PRIVATE"
+	"flag":"GENERAL"
 }
