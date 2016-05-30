@@ -3,7 +3,7 @@ CFLAGS= -g -c -DUSER_MODE
 CC=gcc
 CCP=g++
 MAIN_PROC=MsgHub
-PLUGIN_PROC_OBJ= hub_message_expand.o json_port_func.o login_verify.o
+PLUGIN_PROC_OBJ= hub_message_expand.o json_port_func.o login_verify.o friend_list.o
 INIT_DB_OBJ= general_lib_init.o
 
 main: $(MAIN_PROC)
@@ -21,6 +21,8 @@ json_port_func.o:  json_port_func.c main_proc_func.h
 	$(CC)  $(CFLAGS) json_port_func.c 
 login_verify.o:  login_verify.c main_proc_func.h
 	$(CC)  $(CFLAGS) login_verify.c 
+friend_list.o:  friend_list.c main_proc_func.h
+	$(CC)  $(CFLAGS) friend_list.c 
 clean:
 	rm -f $(MAIN_PROC) *~ *.o *.a
 	ln -s ../../general/connector_process_func.o .

@@ -91,7 +91,7 @@ int proc_ms_ser(void * sub_proc,void *message)
         struct user_info_list *lib_data;
         struct connect_return *return_data; 
 // 	void * record;
-	new_msg=message_create("RETC",NULL);
+	new_msg=message_create("RETC",message);
 	return_data=malloc(sizeof(struct connect_return));
 	user_db=malloc(sizeof(struct user_addr_list));
 	memset(return_data,0,sizeof(struct connect_return));

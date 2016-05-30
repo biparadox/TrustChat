@@ -9,6 +9,8 @@
 #include "json_port_func.h"
 #include "user_info.h"
 #include "login_verify.h"
+#include "friend_list.h"
+
 int MsgHub_init();
 
 

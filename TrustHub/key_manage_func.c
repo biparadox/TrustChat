@@ -425,7 +425,9 @@ int local_key_generate(void * sub_proc)
 						return ret;
 					ret=trustfile_to_uuidname("cert/AIK.sda",pub_keylist->nodeAIKSda);
 					if(ret<0)
+					{
 						return ret;
+					}
 					memcpy(local_keylist->nodeAIKSda,pub_keylist->nodeAIKSda,DIGEST_SIZE*2);
 					
 					ret=DelPolicy(local_keylist,"LKLD");	
@@ -477,9 +479,12 @@ int local_key_generate(void * sub_proc)
 					ret=trustfile_to_uuidname("privkey/bindkey.key",local_keylist->nodeBindKey);
 					if(ret<0)
 						return ret;
-					ret=trustfile_to_uuidname("pubkey/bindkey.pem",pub_keylist->nodeBindKey);
+					ret=trustfile_to_uuidname("pubkey/bindpubkey.pem",pub_keylist->nodeBindKey);
 					if(ret<0)
+					{
+						remove("pubkey/bindpubkey.pem");
 						return ret;
+					}
 
 					if(bindkey_verify(pub_keylist->nodeAIK,pub_keylist->nodeBindKeyVal,pub_keylist->nodeBindKey)!=0)
 					{

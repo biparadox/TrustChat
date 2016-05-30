@@ -23,6 +23,7 @@ static PROC_INIT proc_init_list[]=
 	{"aik_client",PROC_TYPE_DECIDE,&proc_aikclient_init,&proc_aikclient_start},
 	{"file_receiver",PROC_TYPE_MONITOR,&file_receiver_init,&file_receiver_start},
 	{"key_manage",PROC_TYPE_MONITOR,&key_manage_init,&key_manage_start},
+	{"hub_bind",PROC_TYPE_MONITOR,&hub_bind_init,&hub_bind_start},
 	{NULL,0,NULL,NULL}
 };
 

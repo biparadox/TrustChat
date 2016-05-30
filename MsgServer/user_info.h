@@ -54,4 +54,5 @@ static struct struct_elem_attr login_info_desc[]=
 	{"nonce",OS210_TYPE_BINDATA,DIGEST_SIZE,NULL},
 	{NULL,OS210_TYPE_ENDDATA,0,NULL}
 };
+
 #endif

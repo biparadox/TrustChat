@@ -3,7 +3,7 @@ CFLAGS= -g -c -DUSER_MODE
 CC=gcc
 CCP=g++
 MAIN_PROC=TrustHub
-PLUGIN_PROC_OBJ=aik_process_func.o  file_receiver_func.o key_manage_func.o
+PLUGIN_PROC_OBJ=aik_process_func.o  file_receiver_func.o key_manage_func.o hub_bind_func.o
 INIT_DB_OBJ= general_lib_init.o
 
 main: $(MAIN_PROC)
@@ -19,6 +19,8 @@ general_lib_init.o:  general_lib_init.c main_proc_func.h
 	$(CC)  $(CFLAGS) general_lib_init.c 
 key_manage_func.o:  key_manage_func.c main_proc_func.h
 	$(CC)  $(CFLAGS) key_manage_func.c 
+hub_bind_func.o:  hub_bind_func.c main_proc_func.h
+	$(CC)  $(CFLAGS) hub_bind_func.c 
 clean:
 	rm -f $(MAIN_PROC) *~ *.o *.a
 	ln -s ../../general/connector_process_func.o .

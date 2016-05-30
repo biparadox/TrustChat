@@ -64,7 +64,7 @@ int hub_message_expand_start(void * sub_proc,void * para)
 	if(send_msg==NULL)
 		return -EINVAL;
 	message_add_record(send_msg,login);
-	ret=sec_subject_sendmsg(sub_proc,send_msg);
+//	ret=sec_subject_sendmsg(sub_proc,send_msg);
 	if(ret>=0)
 		printf("send first message succeed!\n");
 	usleep(2000*1000);
@@ -103,7 +103,7 @@ int hub_message_expand_start(void * sub_proc,void * para)
                 message_add_expand(send_msg,eei);
 	}
 
-	ret=sec_subject_sendmsg(sub_proc,send_msg);
+//	ret=sec_subject_sendmsg(sub_proc,send_msg);
 	if(ret>=0)
 		printf("send second message succeed!\n");
 	
@@ -161,7 +161,7 @@ int proc_echo_message(void * sub_proc,void * message)
 	
 	new_msg=message_create("MSGD",message);
 	
-/*        if(echo_msg->flag==MSG_PRIVATE){
+        if(echo_msg->flag==MSG_PRIVATE){
         	struct expand_extra_info  *eei;
         	eei =malloc(sizeof(struct expand_extra_info));
         	if(eei==NULL)
@@ -171,7 +171,7 @@ int proc_echo_message(void * sub_proc,void * message)
                 eei->data_size=sizeof(struct expand_extra_info );
                 memcpy(eei->tag,"EEIE",4);
                 message_add_expand(new_msg,eei);
-	}*/
+	}
 	message_add_record(new_msg,echo_msg);
 	sec_subject_sendmsg(sub_proc,new_msg);
 	return ret;

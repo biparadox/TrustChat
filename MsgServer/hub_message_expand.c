@@ -96,15 +96,8 @@ int proc_echo_message(void * sub_proc,void * message)
 	ret=message_get_record(message,&echo_msg,0);
 	if(echo_msg==NULL)
 		return 0;
-
-	time(&tm);
-	echo_msg->time=tm;
-
-	ret=entity_hash_uuid("MSGD",echo_msg);
-	if(ret<0)
-		return ret;
 	
-	new_msg=message_create("MSGD",message);
+	new_msg=message_create("MSGD",NULL);
 	
         if(echo_msg->flag==MSG_PRIVATE){
                 struct expand_extra_info  *eei_data;
@@ -114,6 +107,11 @@ int proc_echo_message(void * sub_proc,void * message)
                 ret=message_remove_expand(message,"EEIE",&eei_data);
                 if(ret<0)
  		   return ret;
+		if(eei_data==NULL)
+		{
+			printf("private message no receiver!\n");
+			return -EINVAL;
+		}
                 ret=FindPolicy(eei_data->uuid,"U2AL",&first_msg);
 		if(ret<0)
                         return -EINVAL;
