@@ -239,7 +239,7 @@ int proc_unbind_message(void * sub_proc,void * message)
 
 	if(local_keylist==NULL)
 	{
-		printf("can't find user %s's public key struct!\n",user_info->name);
+		printf("can't find user %s's private key struct!\n",user_info->name);
 	}
 
 	
