@@ -10,6 +10,7 @@
 #include "user_info.h"
 #include "login_verify.h"
 #include "friend_list.h"
+#include "echo_plugin_func.h"
 
 int MsgHub_init();
 

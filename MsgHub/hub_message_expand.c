@@ -128,7 +128,7 @@ int hub_message_expand_start(void * sub_proc,void * para)
 			continue;
 		}
 		if(strncmp(type,"MSGD",4)==0)
-			proc_echo_message(sub_proc,recv_msg);
+			proc_expand_message(sub_proc,recv_msg);
 		//if(strncmp(type,"LOGI",4)==0)
 		//	proc_echo_message(sub_proc,recv_msg);
 	}
@@ -136,7 +136,7 @@ int hub_message_expand_start(void * sub_proc,void * para)
 	return 0;
 };
 
-int proc_echo_message(void * sub_proc,void * message)
+int proc_expand_message(void * sub_proc,void * message)
 {
 	const char * type;
 	int i;

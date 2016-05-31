@@ -531,6 +531,34 @@ int local_key_generate(void * sub_proc)
 
 }
 
+int local_pubkey_share(void * sub_proc)
+{
+	struct node_key_list * pub_keylist;
+	int ret;
+	int count;
+	char uuidname[DIGEST_SIZE*2+16];
+	char local_uuid[DIGEST_SIZE*2+1];
+	char proc_name[DIGEST_SIZE*2+1];
+	char proc_uuid[DIGEST_SIZE*2+1];
+	BYTE digest[DIGEST_SIZE];
+
+	void * sendmsg;
+	
+	ret=proc_share_data_getvalue("uuid",local_uuid);
+	ret=proc_share_data_getvalue("proc_name",proc_name);
+	comp_proc_uuid(local_uuid,proc_name,proc_uuid);
+
+	ret=FindPolicy(proc_uuid,"NKLD",&pub_keylist);
+	if((ret<0) || (pub_keylist==NULL))
+		return -EINVAL;
+		
+	sendmsg=message_create("NKLD",NULL);
+	message_add_record(sendmsg,pub_keylist);
+	
+	sec_subject_sendmsg(sub_proc,sendmsg);
+
+	return 0;
+}
 
 int key_manage_init(void * sub_proc,void * para)
 {
@@ -557,11 +585,8 @@ int key_manage_start(void * sub_proc,void * para)
 
 	enum key_state_type{
 		NO_KEY,
-		AIK_REQUEST,
-		AIK_READY,
-		BINDKEY_REQUEST,
-		BINDKEY_READY,
-		BINDKEY_VERIFIED,
+		KEY_GENERATE,
+		KEY_SHARED,
 		KEY_ERROR
 	}; 
 
@@ -579,151 +604,37 @@ int key_manage_start(void * sub_proc,void * para)
 	ret=local_key_generate(sub_proc);	
 	if(ret<0)
 		return ret;
-
-
-/*
-	for(i=0;i<3000*1000;i++)
+	key_state=KEY_GENERATE;
+	for(i=0;i<300*1000;i++)
 	{
 
 		usleep(time_val.tv_usec);
 		switch(key_state){
-			case NO_KEY:
+			case KEY_GENERATE:
+				usleep(time_val.tv_usec);
+				ret=sec_subject_recvmsg(sub_proc,&recv_msg);
+				if(ret<0)
+					continue;
+				if(recv_msg==NULL)
+					continue;
 
-				fd=open("pubkey/AIK.pem",O_RDONLY);
-				if(fd>0)
+ 				type=message_get_recordtype(recv_msg);
+				if(type==NULL)
 				{
-					key_state=AIK_READY;
-					count=0;
+					message_free(recv_msg);
+					continue;
 				}
-				else
+				if(strncmp(type,"ACKI",4)==0)
 				{
-					close(fd);
-					key_req=malloc(sizeof(struct key_request_cmd));
-					if(key_req==NULL)
-						return -EINVAL;		
-					memcpy(key_req->machine_uuid,local_uuid,DIGEST_SIZE*2);
-					key_req->proc_name=dup_str(proc_name,DIGEST_SIZE*2);
-					key_req->keyusage=TPM_KEY_IDENTITY;
-					key_req->keyflags=0;
-					count=0;
-					key_state=AIK_REQUEST;
-					sendmsg=message_create("KREC",NULL);
-					if(sendmsg==NULL)
-						return -EINVAL;
-					message_add_record(sendmsg,key_req);
-					sec_subject_sendmsg(sub_proc,sendmsg);	
-				}
-				break;
-			case AIK_REQUEST:
-				fd=open("pubkey/AIK.pem",O_RDONLY);
-				if(fd>0)
-					key_state=AIK_READY;
-				else
-				{
-					close(fd);
-					count++;
-					if(count>1000)
-					{
-						printf("do not get AIK");
-						key_state=NO_KEY;
-					}	
-				}
-				break;
-			case AIK_READY:
-
-				fd=open("cert/AIK.sda",O_RDONLY);
-				if(fd<0)
-				{
-					count++;
-					break;
-				}
-				else
-				{
-					close(fd);
-					ret=aik_verify(NULL);
+					ret=local_pubkey_share(sub_proc);
 					if(ret<0)
-					{
-						remove("cert/AIK.sda");
-						remove("pubkey/AIK.pem");
-						key_state=NO_KEY;
-						break;
-					}
-					remove("cert/bindkey.val");
-					remove("pubkey/bindpubkey.pem");
-					count=0;
-					key_req=malloc(sizeof(struct key_request_cmd));
-					if(key_req==NULL)
-						return -EINVAL;		
-					memcpy(key_req->machine_uuid,local_uuid,DIGEST_SIZE*2);
-					key_req->proc_name=dup_str(proc_name,DIGEST_SIZE*2);
-					key_req->keyusage=TPM_KEY_BIND;
-					key_req->keyflags=0;
-					count=0;
-					key_state=BINDKEY_REQUEST;
-					sendmsg=message_create("KREC",NULL);
-					if(sendmsg==NULL)
-						return -EINVAL;
-					message_add_record(sendmsg,key_req);
-					sec_subject_sendmsg(sub_proc,sendmsg);	
+						return ret;
+					key_state=KEY_SHARED;
 				}
 				break;
-			case BINDKEY_REQUEST:
-				fd=open("pubkey/bindpubkey.pem",O_RDONLY);
-				if(fd>0)
-					key_state=BINDKEY_READY;
-				else
-				{
-					close(fd);
-					count++;
-					if(count>5000)
-					{
-						printf("do not get Bind key");
-						key_state=AIK_READY;
-					}	
-				}
-				break;
-			case BINDKEY_READY:
-				fd=open("cert/bindkey.val",O_RDONLY);
-				if(fd<0)
-				{
-					count++;
-					if(count>5000)
-					{
-						printf("do not get Bind key valdata");
-						key_state=AIK_READY;
-					}	
-					break;
-				}
-				else
-				{
-					close(fd);
-					ret=bindkey_verify();
-					if(ret!=0)
-					{
-						remove("cert/bindkey.val");
-						remove("pubkey/bindpubkey.pem");
-						key_state=AIK_READY;
-						break;
-					}	
-					
-					key_state=BINDKEY_VERIFIED;
-				}
-
-				break;
-			
-			case BINDKEY_VERIFIED:
-//				ret=bind_pubkey_memdb_init();
-//				if(ret<0)
-//				{
-//					printf("load bindpubkey error %d!\n",ret);
-//				}
-				
-				return 0;
 			default:
-				return -EINVAL;	
-		
+				break;
 		}
 	}
-*/
 	return 0;
 }

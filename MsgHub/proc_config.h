@@ -14,6 +14,7 @@ static PROCDB_INIT procdb_init_list[]=
 	{"UL_I",&general_lib_init,&user_info_list_desc,&general_lib_ops},
 	{"LOGI",NULL,&login_info_desc,NULL},
 	{"RETC",NULL,&connect_return_desc,NULL},
+	{"NKLD",&null_init_func,&node_key_list_desc,&general_lib_ops},
 	{NULL,NULL,NULL,NULL}
 };
 
@@ -22,7 +23,7 @@ static PROC_INIT proc_init_list[]=
 	{"hub_message_expand",PROC_TYPE_MONITOR,&hub_message_expand_init,&hub_message_expand_start},
 	{"friend_list",PROC_TYPE_MONITOR,&friend_list_init,&friend_list_start},
 	{"json_port",PROC_TYPE_MONITOR,&json_port_init,&json_port_start},
-//        {"login_verify",PROC_TYPE_MONITOR,&login_verify_init,&login_verify_start},
+        {"echo_plugin",PROC_TYPE_MONITOR,&echo_plugin_init,&echo_plugin_start},
 	{NULL,0,NULL,NULL}
 };
 
