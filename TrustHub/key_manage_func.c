@@ -730,6 +730,19 @@ int key_manage_start(void * sub_proc,void * para)
 					}
 					sec_subject_sendmsg(sub_proc,recv_msg);
 				}
+				else if(strncmp(type,"NKLD",4)==0)
+				{
+					struct node_key_list * pub_keylist;
+					int j=0;
+					
+					ret=message_get_record(recv_msg,&pub_keylist,j++);
+					
+					if(pub_keylist!=NULL)
+					{
+						AddPolicy(pub_keylist,"NKLD");
+					}
+					ExportPolicy("NKLD");
+				}
 				
 				break;
 			default:
