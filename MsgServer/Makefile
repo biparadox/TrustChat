@@ -3,7 +3,7 @@ CFLAGS= -g -c -DUSER_MODE
 CC=gcc
 CCP=g++
 MAIN_PROC=MsgServer
-PLUGIN_PROC_OBJ= hub_message_expand.o ms_ser_db.o key_storage_func.o
+PLUGIN_PROC_OBJ= hub_message_expand.o ms_ser_db.o key_storage_func.o file_receiver_func.o
 INIT_DB_OBJ= general_lib_init.o
 
 main: $(MAIN_PROC)
@@ -21,6 +21,9 @@ ms_ser_db.o:  ms_ser_db.c main_proc_func.h
 	$(CC)  $(CFLAGS) ms_ser_db.c 
 key_storage_func.o:  key_storage_func.c main_proc_func.h
 	$(CC)  $(CFLAGS) key_storage_func.c 
+file_receiver_func.o: file_receiver_func.c file_receiver_func.h
+	$(CC)  $(CFLAGS) file_receiver_func.c 
+	
 clean:
 	rm -f $(MAIN_PROC) *~ *.o *.a
 	ln -s ../../general/connector_process_func.o .
