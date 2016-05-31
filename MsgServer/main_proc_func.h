@@ -8,6 +8,7 @@
 #include "../include/message_struct_desc.h"
 #include "hub_message_expand.h"
 #include "ms_ser_db.h"
+#include "key_storage_func.h"
 int MsgServer_init();
 
 
