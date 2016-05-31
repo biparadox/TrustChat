@@ -43,6 +43,29 @@ int friend_list_start(void * sub_proc,void * para)
         int i;
         const char * type;
 
+	void * new_msg;
+	struct user_info_list * user_info;
+	struct login_info * friend;
+
+        new_msg=message_create("LOGI",NULL);
+	ret=GetFirstPolicy(&user_info,"UL_I");
+	if(ret<0)
+		return ret;
+	while(user_info!=NULL)
+	{
+        	friend=malloc(sizeof(struct login_info));
+		if(friend==NULL)
+			return -ENOMEM;
+        	memset(friend,0,sizeof(struct login_info));
+		strncpy(friend->user,user_info->name,DIGEST_SIZE);
+        	message_add_record(new_msg,friend);
+		ret=GetNextPolicy(&user_info,"UL_I");
+		if(ret<0)
+			return ret;
+	}
+	usleep(700*1000);
+        sec_subject_sendmsg(sub_proc,new_msg);
+
 
         for(i=0;i<3000*1000;i++)
         {

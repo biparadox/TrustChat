@@ -348,7 +348,7 @@ int local_key_generate(void * sub_proc)
 				if(key_req==NULL)
 					return -EINVAL;		
 				memcpy(key_req->machine_uuid,local_uuid,DIGEST_SIZE*2);
-				key_req->proc_name=dup_str("local",DIGEST_SIZE*2);
+				memcpy(key_req->proc_name,"local",5);
 				key_req->keyusage=TPM_KEY_IDENTITY;
 				key_req->keyflags=0;
 				count=0;
@@ -556,8 +556,88 @@ int local_pubkey_share(void * sub_proc)
 	message_add_record(sendmsg,pub_keylist);
 	
 	sec_subject_sendmsg(sub_proc,sendmsg);
+	
+	
+	void * new_msg;
+	struct policyfile_data * reqdata;
+	// share AIK
+	sprintf(uuidname,"pubkey/%.64s.pem",pub_keylist->nodeAIK);
+	ret=build_filedata_struct(&reqdata,uuidname);
+	new_msg=message_create("FILD",NULL);
+	if(new_msg!=NULL)
+	{
+		message_add_record(new_msg,reqdata);
+		sec_subject_sendmsg(sub_proc,new_msg);
+	}
+	// share AIKsda
+	sprintf(uuidname,"cert/%.64s.sda",pub_keylist->nodeAIKSda);
+	ret=build_filedata_struct(&reqdata,uuidname);
+	new_msg=message_create("FILD",NULL);
+	if(new_msg!=NULL)
+	{
+		message_add_record(new_msg,reqdata);
+		sec_subject_sendmsg(sub_proc,new_msg);
+	}
+	// share Bindkey
+	sprintf(uuidname,"pubkey/%.64s.pem",pub_keylist->nodeBindKey);
+	ret=build_filedata_struct(&reqdata,uuidname);
+	new_msg=message_create("FILD",NULL);
+	if(new_msg!=NULL)
+	{
+		message_add_record(new_msg,reqdata);
+		sec_subject_sendmsg(sub_proc,new_msg);
+	}
+	// share Bindkeyval
+	sprintf(uuidname,"cert/%.64s.val",pub_keylist->nodeBindKeyVal);
+	ret=build_filedata_struct(&reqdata,uuidname);
+	new_msg=message_create("FILD",NULL);
+	if(new_msg!=NULL)
+	{
+		message_add_record(new_msg,reqdata);
+		sec_subject_sendmsg(sub_proc,new_msg);
+	}
 
 	return 0;
+}
+
+int local_pubkey_request(void * sub_proc,char * user)
+{
+	struct node_key_list * pub_keylist;
+	int ret;
+	int count;
+	char uuidname[DIGEST_SIZE*2+16];
+	char proc_uuid[DIGEST_SIZE*2+1];
+	BYTE digest[DIGEST_SIZE];
+
+	void * sendmsg;
+
+
+	ret=GetFirstPolicy(&pub_keylist,"NKLD");
+	if(ret<0)
+		return -EINVAL;
+	while(pub_keylist!=NULL)
+	{
+		if(strncmp(pub_keylist->username,user,DIGEST_SIZE)==0)
+		{
+			printf("user %s's pubkey is already getten!\n",user);
+			return 0;
+		}
+		ret=GetNextPolicy(&pub_keylist,"NKLD");
+		if(ret<0)
+			return -EINVAL;
+	}	
+	
+	struct key_request_cmd * key_req;
+	key_req=malloc(sizeof(struct key_request_cmd));
+	if(key_req==NULL)
+		return -ENOMEM;
+	memset(key_req,0,sizeof(struct key_request_cmd));
+	strncpy(key_req->user_name,user,DIGEST_SIZE);	
+
+	sendmsg=message_create("KREC",NULL);
+	message_add_record(sendmsg,key_req);
+	
+	sec_subject_sendmsg(sub_proc,sendmsg);
 }
 
 int key_manage_init(void * sub_proc,void * para)
@@ -607,23 +687,22 @@ int key_manage_start(void * sub_proc,void * para)
 	key_state=KEY_GENERATE;
 	for(i=0;i<300*1000;i++)
 	{
-
 		usleep(time_val.tv_usec);
+		ret=sec_subject_recvmsg(sub_proc,&recv_msg);
+		if(ret<0)
+			continue;
+		if(recv_msg==NULL)
+			continue;
+
+ 		type=message_get_recordtype(recv_msg);
+		if(type==NULL)
+		{
+			message_free(recv_msg);
+			continue;
+		}
+
 		switch(key_state){
 			case KEY_GENERATE:
-				usleep(time_val.tv_usec);
-				ret=sec_subject_recvmsg(sub_proc,&recv_msg);
-				if(ret<0)
-					continue;
-				if(recv_msg==NULL)
-					continue;
-
- 				type=message_get_recordtype(recv_msg);
-				if(type==NULL)
-				{
-					message_free(recv_msg);
-					continue;
-				}
 				if(strncmp(type,"ACKI",4)==0)
 				{
 					ret=local_pubkey_share(sub_proc);
@@ -631,6 +710,27 @@ int key_manage_start(void * sub_proc,void * para)
 						return ret;
 					key_state=KEY_SHARED;
 				}
+				break;
+			case KEY_SHARED:
+				if(strncmp(type,"LOGI",4)==0)
+				{
+					struct login_info * user_info;
+					int j=0;
+					
+					ret=message_get_record(recv_msg,&user_info,j++);
+					
+					while(user_info!=NULL)
+					{
+						ret=local_pubkey_request(sub_proc,user_info->user);
+						if(ret<0)
+							break;
+						ret=message_get_record(recv_msg,&user_info,j++);
+						if(ret<0)
+							break;
+					}
+					sec_subject_sendmsg(sub_proc,recv_msg);
+				}
+				
 				break;
 			default:
 				break;
