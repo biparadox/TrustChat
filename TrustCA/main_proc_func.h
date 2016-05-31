@@ -6,6 +6,9 @@
 #include "../include/tesi_key_desc.h"
 #include "../include/tesi_aik_struct.h"
 #include "aik_casign_func.h"
+#include "session_msg.h"
+#include "key_storage_func.h"
+#include "file_receiver_func.h"
 
 int TrustCA_init();
 

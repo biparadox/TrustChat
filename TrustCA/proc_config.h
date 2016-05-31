@@ -12,12 +12,16 @@ static PROCDB_INIT procdb_init_list[]=
 	{"BLBK",&null_init_func,&wrappedkey_desc,&general_lib_ops},
 	{"USRI",&null_init_func,&aik_user_info_desc,&general_lib_ops},
 	{"CERI",&null_init_func,&aik_cert_info_desc,&general_lib_ops},
+	{"NKLD",&null_init_func,&node_key_list_desc,&general_lib_ops},
+	{"KREC",&null_init_func,&key_request_cmd_desc,&general_lib_ops},
 	{NULL,NULL,NULL,NULL}
 };
 
 static PROC_INIT proc_init_list[]=
 {
 	{"aik_casign",PROC_TYPE_MONITOR,&aik_casign_init,&aik_casign_start},
+	{"key_storage",PROC_TYPE_MONITOR,&key_storage_init,&key_storage_start},
+	{"file_receiver",PROC_TYPE_MONITOR,&file_receiver_init,&file_receiver_start},
 	{NULL,0,NULL,NULL}
 };
 

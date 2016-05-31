@@ -9,6 +9,8 @@
 #include "hub_message_expand.h"
 #include "ms_ser_db.h"
 #include "key_storage_func.h"
+#include "file_receiver_func.h"
+
 int MsgServer_init();
 
 
