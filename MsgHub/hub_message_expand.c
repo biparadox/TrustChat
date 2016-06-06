@@ -52,7 +52,7 @@ int hub_message_expand_start(void * sub_proc,void * para)
 	struct login_info * login;
 	
 
-
+/*
 	usleep(500*1000);
 	ret=GetFirstPolicy(&user_info,"UL_I");
 	if(ret<0)
@@ -106,7 +106,7 @@ int hub_message_expand_start(void * sub_proc,void * para)
 //	ret=sec_subject_sendmsg(sub_proc,send_msg);
 	if(ret>=0)
 		printf("send second message succeed!\n");
-	
+*/	
 
 	for(i=0;i<3000*1000;i++)
 	{

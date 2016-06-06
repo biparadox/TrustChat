@@ -46,7 +46,7 @@ int friend_list_start(void * sub_proc,void * para)
 	void * new_msg;
 	struct user_info_list * user_info;
 	struct login_info * friend;
-
+/*
         new_msg=message_create("LOGI",NULL);
 	ret=GetFirstPolicy(&user_info,"UL_I");
 	if(ret<0)
@@ -65,7 +65,7 @@ int friend_list_start(void * sub_proc,void * para)
 	}
 	usleep(700*1000);
         sec_subject_sendmsg(sub_proc,new_msg);
-
+*/
 
         for(i=0;i<3000*1000;i++)
         {
