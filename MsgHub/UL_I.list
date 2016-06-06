@@ -1,12 +1,12 @@
 {
 	"name":"zhaowen",
 	"passwd":"123",
-	"state":"ADMIN"
+	"state":"GENERAL"
 }
 {
 	"name":"zhangle",
 	"passwd":"123",
-	"state":"GENERAL"
+	"state":"ADMIN"
 }
 {
 	"name":"meibenshan",

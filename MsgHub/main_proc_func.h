@@ -11,6 +11,7 @@
 #include "login_verify.h"
 #include "friend_list.h"
 #include "echo_plugin_func.h"
+#include "websocket_func.h"
 
 int MsgHub_init();
 

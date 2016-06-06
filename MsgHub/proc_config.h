@@ -24,6 +24,7 @@ static PROC_INIT proc_init_list[]=
 	{"friend_list",PROC_TYPE_MONITOR,&friend_list_init,&friend_list_start},
 	{"json_port",PROC_TYPE_MONITOR,&json_port_init,&json_port_start},
         {"echo_plugin",PROC_TYPE_MONITOR,&echo_plugin_init,&echo_plugin_start},
+	{"ws_port",PROC_TYPE_MONITOR,&websocket_port_init,&websocket_port_start},
 	{NULL,0,NULL,NULL}
 };
 
