@@ -685,7 +685,7 @@ int key_manage_start(void * sub_proc,void * para)
 	if(ret<0)
 		return ret;
 	key_state=KEY_GENERATE;
-	for(i=0;i<300*1000;i++)
+	for(i=0;i<3000*1000;i++)
 	{
 		usleep(time_val.tv_usec);
 		ret=sec_subject_recvmsg(sub_proc,&recv_msg);

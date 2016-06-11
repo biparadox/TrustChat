@@ -12,9 +12,9 @@ enum user_state_type
 struct user_info_list{
 	char name[DIGEST_SIZE];
 	BYTE passwd[DIGEST_SIZE];
-	int  register_time;
+	long  register_time;
 	enum  user_state_type state;
-};
+}__attribute__((packed));
 
 static NAME2VALUE user_state_type_valuelist[] =
 {

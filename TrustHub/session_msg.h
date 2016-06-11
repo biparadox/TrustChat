@@ -12,7 +12,7 @@ struct session_msg{
 char uuid[DIGEST_SIZE*2];
 char sender[DIGEST_SIZE];
 char receiver[DIGEST_SIZE];
-int  time;
+long  time;
 char * msg;
 int  flag;
 };

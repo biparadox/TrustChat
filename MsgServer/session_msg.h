@@ -12,7 +12,7 @@ struct session_msg{
 char uuid[DIGEST_SIZE*2];
 char sender[DIGEST_SIZE];
 char receiver[DIGEST_SIZE];
-int  time;
+long  time;
 char * msg;
 int  flag;
 };
@@ -31,7 +31,7 @@ static struct struct_elem_attr session_msg_desc[]=
         {"uuid",OS210_TYPE_STRING,DIGEST_SIZE*2,NULL},
         {"sender",OS210_TYPE_STRING,DIGEST_SIZE,NULL},
         {"receiver",OS210_TYPE_STRING,DIGEST_SIZE,NULL},
-        {"time",OS210_TYPE_TIME,sizeof(int),NULL},
+        {"time",OS210_TYPE_TIME,sizeof(long),NULL},
         {"msg",OS210_TYPE_ESTRING,512,NULL},
         {"flag",OS210_TYPE_FLAG,sizeof(int),&message_type_valuelist},
 	{NULL,OS210_TYPE_ENDDATA,0,NULL}

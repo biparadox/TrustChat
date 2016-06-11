@@ -74,7 +74,7 @@ int proc_key_storage(void * sub_proc,void * message)
 	const char * type;
 	int i;
 	int ret;
-	printf("begin proc echo \n");
+	printf("begin proc key storage \n");
 	struct message_box * msg_box=message;
 
 	void * record;

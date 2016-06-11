@@ -81,7 +81,7 @@ int proc_echo_message(void * sub_proc,void * message)
 	//struct expand_time_stamp * time_stamp;
 	//char * timestr;
 	//time_stamp = malloc(sizeof(struct expand_time_stamp));
-	printf("begin proc echo \n");
+	printf("begin message addr finding! \n");
 	struct message_box * msg_box=message;
 
 	struct message_box * new_msg;
@@ -118,6 +118,7 @@ int proc_echo_message(void * sub_proc,void * message)
                	eei->data_size=sizeof(struct expand_extra_info );
                	memcpy(eei->tag,"EEIE",4);
                	message_add_expand(message,eei);
+		sec_subject_sendmsg(sub_proc,message);
 	}
 	else
 	{
@@ -155,6 +156,7 @@ int proc_echo_message(void * sub_proc,void * message)
                 	eei->data_size=sizeof(struct expand_extra_info );
                 	memcpy(eei->tag,"EEIE",4);
                 	message_add_expand(message,eei);
+			sec_subject_sendmsg(sub_proc,message);
 		}
                
 		else if(echo_msg->flag==MSG_GENERAL){
@@ -164,20 +166,24 @@ int proc_echo_message(void * sub_proc,void * message)
 			ret=GetFirstPolicy(&first_msg,"U2AL");
 	        	if(ret<0)
         	        	return -EINVAL;
-			if(first_msg==NULL)
+			while(first_msg!=NULL)
 			{
-				printf("find addr failed!\n");
-				return -EINVAL;
-			}
+				
+				new_msg=message_clone(message);
 
-               	 	eei =malloc(sizeof(struct expand_extra_info));
-                	if(eei==NULL)
-                        	return -ENOMEM;
-                	memset(eei->uuid,0,DIGEST_SIZE*2);
-                	memcpy(eei->uuid,first_msg->addr,DIGEST_SIZE*2);
-                	eei->data_size=sizeof(struct expand_extra_info );
-                	memcpy(eei->tag,"EEIE",4);
-                	message_add_expand(message,eei);
+               	 		eei =malloc(sizeof(struct expand_extra_info));
+                		if(eei==NULL)
+                        		return -ENOMEM;
+                		memset(eei->uuid,0,DIGEST_SIZE*2);
+                		memcpy(eei->uuid,first_msg->addr,DIGEST_SIZE*2);
+                		eei->data_size=sizeof(struct expand_extra_info );
+                		memcpy(eei->tag,"EEIE",4);
+                		message_add_expand(new_msg,eei);
+				sec_subject_sendmsg(sub_proc,new_msg);
+				ret=GetNextPolicy(&first_msg,"U2AL");
+	        		if(ret<0)
+        	        		return -EINVAL;
+			}
         	}
 
         }
@@ -187,6 +193,5 @@ int proc_echo_message(void * sub_proc,void * message)
 	//	return -EINVAL;
 
 	//message_add_expand(new_msg,time_stamp);
-	sec_subject_sendmsg(sub_proc,message);
 	return ret;
 }

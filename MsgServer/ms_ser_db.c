@@ -82,7 +82,7 @@ int proc_ms_ser(void * sub_proc,void *message)
 	message_get_define_expand(message,&flow_trace,"FTRE");
 	printf("*******|%s|*******\n",flow_trace->trace_record);
 
-	printf("begin proc echo \n");
+	printf("begin proc user-addr table build! \n");
 	struct message_box * msg_box=message;
 	type=message_get_recordtype(message);
 	struct user_addr_list *user_db;

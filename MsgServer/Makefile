@@ -11,8 +11,6 @@ $(MAIN_PROC):  main_proc.c $(MAIN_PROC)_func.o $(PLUGIN_PROC_OBJ) $(INIT_DB_OBJ)
 	$(CC) $(FLAGS) $(MAIN_PROC) main_proc.c connector_process_func.o router_process_func.o $(MAIN_PROC)_func.o $(PLUGIN_PROC_OBJ) $(INIT_DB_OBJ)  -L../lib -lopenstacktrust -lentity -lrouter -lpolicy_ui -lmemdb -lconnector -lmessage -llogicdb -lstruct -lsysfunc -lcrypto_func -lpthread
 $(MAIN_PROC)_func.o: $(MAIN_PROC)_func.c main_proc_func.h
 	$(CC) $(CFLAGS) $(MAIN_PROC)_func.c
-#echo_plugin_func.o:  echo_plugin_func.c main_proc_func.h
-#	$(CC)  $(CFLAGS) echo_plugin_func.c 
 general_lib_init.o:  general_lib_init.c main_proc_func.h
 	$(CC)  $(CFLAGS) general_lib_init.c 
 hub_message_expand.o:  hub_message_expand.c main_proc_func.h

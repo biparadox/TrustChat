@@ -1,0 +1,25 @@
+#!/bin/sh
+cd TrustCA
+./TrustCA &
+cd -
+sleep 3
+cd TrustHub
+./TrustHub &
+cd -
+sleep 3
+cd TrustHub1
+./TrustHub1 &
+cd -
+sleep 3
+cd MsgServer
+./MsgServer &
+cd -
+sleep 3
+cd MsgHub
+./MsgHub &
+cd -
+sleep 3
+cd MsgHub1
+./MsgHub1 &
+cd -
+sleep 3

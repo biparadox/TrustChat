@@ -139,38 +139,50 @@ int proc_key_response(void * sub_proc,void * message)
 
 	sprintf(uuidname,"pubkey/%.64s.pem",pub_keylist->nodeAIK);
 	ret=build_filedata_struct(&reqdata,uuidname);
-	new_msg=message_create("FILD",message);
-	if(new_msg!=NULL)
+	if(ret>=0)
 	{
-		message_add_record(new_msg,reqdata);
-		sec_subject_sendmsg(sub_proc,new_msg);
+		new_msg=message_create("FILD",message);
+		if(new_msg!=NULL)
+		{
+			message_add_record(new_msg,reqdata);
+			sec_subject_sendmsg(sub_proc,new_msg);
+		}
 	}
 	// share AIKsda
 	sprintf(uuidname,"cert/%.64s.sda",pub_keylist->nodeAIKSda);
 	ret=build_filedata_struct(&reqdata,uuidname);
-	new_msg=message_create("FILD",message);
-	if(new_msg!=NULL)
+	if(ret>=0)
 	{
-		message_add_record(new_msg,reqdata);
-		sec_subject_sendmsg(sub_proc,new_msg);
+		new_msg=message_create("FILD",message);
+		if(new_msg!=NULL)
+		{
+			message_add_record(new_msg,reqdata);
+			sec_subject_sendmsg(sub_proc,new_msg);
+		}
 	}
 	// share Bindkey
 	sprintf(uuidname,"pubkey/%.64s.pem",pub_keylist->nodeBindKey);
 	ret=build_filedata_struct(&reqdata,uuidname);
-	new_msg=message_create("FILD",message);
-	if(new_msg!=NULL)
+	if(ret>=0)
 	{
-		message_add_record(new_msg,reqdata);
-		sec_subject_sendmsg(sub_proc,new_msg);
+		new_msg=message_create("FILD",message);
+		if(new_msg!=NULL)
+		{
+			message_add_record(new_msg,reqdata);
+			sec_subject_sendmsg(sub_proc,new_msg);
+		}
 	}
 	// share Bindkeyval
 	sprintf(uuidname,"cert/%.64s.val",pub_keylist->nodeBindKeyVal);
 	ret=build_filedata_struct(&reqdata,uuidname);
-	new_msg=message_create("FILD",message);
-	if(new_msg!=NULL)
+	if(ret>=0)
 	{
-		message_add_record(new_msg,reqdata);
-		sec_subject_sendmsg(sub_proc,new_msg);
+		new_msg=message_create("FILD",message);
+		if(new_msg!=NULL)
+		{
+			message_add_record(new_msg,reqdata);
+			sec_subject_sendmsg(sub_proc,new_msg);
+		}
 	}
 
 	return 0;

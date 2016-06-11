@@ -92,7 +92,7 @@ int aik_casign_start(void * sub_proc,void * para)
 
 	printf("begin aik casign start!\n");
 
-	for(i=0;i<300*1000;i++)
+	for(i=0;i<3000*1000;i++)
 	{
 		usleep(time_val.tv_usec);
 		ret=sec_subject_recvmsg(sub_proc,&recv_msg);
