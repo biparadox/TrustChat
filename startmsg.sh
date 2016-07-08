@@ -8,6 +8,9 @@ cd MsgHub
 cd -
 sleep 3
 cd MsgHub1
-./MsgHub1 &
+./MsgHub &
 cd -
 sleep 3
+cd MsgHub2
+./MsgHub &
+cd -

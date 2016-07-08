@@ -16,6 +16,8 @@ key_storage_func.o:  key_storage_func.c main_proc_func.h
 	$(CC)  $(CFLAGS) key_storage_func.c 
 file_receiver_func.o: file_receiver_func.c file_receiver_func.h
 	$(CC)  $(CFLAGS) file_receiver_func.c 
+cleankey: 
+	rm lib/* pubkey/* cert/*.sda cert/*.val
 clean:
 	rm -f $(MAIN_PROC) *~ *.o *.a
 	ln -s ../../general/connector_process_func.o .

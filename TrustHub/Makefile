@@ -21,6 +21,8 @@ key_manage_func.o:  key_manage_func.c main_proc_func.h
 	$(CC)  $(CFLAGS) key_manage_func.c 
 hub_bind_func.o:  hub_bind_func.c main_proc_func.h
 	$(CC)  $(CFLAGS) hub_bind_func.c 
+cleankey:
+	rm lib/* cert/*.req cert/*.val cert/*.sda privkey/* pubkey/*
 clean:
 	rm -f $(MAIN_PROC) *~ *.o *.a
 	ln -s ../../general/connector_process_func.o .

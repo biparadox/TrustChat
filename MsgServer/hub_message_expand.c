@@ -66,13 +66,13 @@ int hub_message_expand_start(void * sub_proc,void * para)
 			continue;
 		}
 		if(strncmp(type,"MSGD",4)==0)
-			proc_echo_message(sub_proc,recv_msg);
+			transport_message(sub_proc,recv_msg);
 	}
 
 	return 0;
 };
 
-int proc_echo_message(void * sub_proc,void * message)
+int transport_message(void * sub_proc,void * message)
 {
 	const char * type;
 	int i;
